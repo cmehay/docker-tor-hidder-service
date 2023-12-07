@@ -18,7 +18,7 @@ RUN     apk add --no-cache git bind-tools cargo libevent-dev openssl-dev gnupg g
     --disable-asciidoc \
     --sysconfdir=/etc \
     --disable-unittests && \
-    make && make install && \
+    make -j$(nprocs) && make install && \
     cd .. && \
     rm -rf tor && \
     pip3 install --upgrade pip poetry && \
@@ -32,7 +32,7 @@ RUN    apk add --no-cache git gcc make automake autoconf musl-dev libtool && \
     git checkout $TORSOCKS_VERSION && \
     ./autogen.sh && \
     ./configure && \
-    make && make install && \
+    make -j$(nprocs) && make install && \
     cd .. && \
     rm -rf torsocks && \
     apk del git gcc make automake autoconf musl-dev libtool
@@ -42,13 +42,13 @@ RUN     mkdir -p /etc/tor/
 COPY    pyproject.toml /usr/local/src/onions/
 
 RUN     cd /usr/local/src/onions && apk add --no-cache openssl-dev libffi-dev gcc libc-dev && \
-    poetry install --no-dev --no-root && \
+    poetry install --only main --no-root && \
     apk del libffi-dev gcc libc-dev openssl-dev
 
 COPY    onions /usr/local/src/onions/onions
 COPY    poetry.lock /usr/local/src/onions/
 RUN     cd /usr/local/src/onions && apk add --no-cache gcc libc-dev && \
-    poetry install --no-dev && \
+    poetry install --only main && \
     apk del gcc libc-dev
 
 RUN     mkdir -p ${HOME}/.tor && \

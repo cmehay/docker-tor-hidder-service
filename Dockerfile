@@ -16,7 +16,6 @@ RUN set -ex; \
     git checkout tor-$TOR_VERSION && \
     ./autogen.sh && \
     ./configure \
-    --enable-fatal-warnings=no \
     --disable-asciidoc \
     --sysconfdir=/etc \
     --disable-unittests && \
@@ -34,9 +33,8 @@ RUN set -ex; \
     TORSOCKS_VERSION=${torsocks_version=$(git tag | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)} && \
     git checkout $TORSOCKS_VERSION && \
     ./autogen.sh && \
-    ./configure \
-    --enable-fatal-warnings=no && \
-    make -j$(nproc) && make install && \
+    ./configure && \
+    make -j$(nproc) CFLAGS="-Wno-error=implicit-function-declaration" && make install && \
     cd .. && \
     rm -rf torsocks && \
     apk del git gcc make automake autoconf musl-dev libtool

@@ -7,7 +7,8 @@ ARG     torsocks_version
 ENV     HOME /var/lib/tor
 ENV     POETRY_VIRTUALENVS_CREATE=false
 
-RUN     apk add --no-cache git bind-tools cargo libevent-dev openssl-dev gnupg gcc make automake ca-certificates autoconf musl-dev coreutils libffi-dev zlib-dev && \
+RUN set -ex; \
+    apk add --no-cache git bind-tools cargo libevent-dev openssl-dev gnupg gcc make automake ca-certificates autoconf musl-dev coreutils libffi-dev zlib-dev && \
     mkdir -p /usr/local/src/ /var/lib/tor/ && \
     git clone https://git.torproject.org/tor.git /usr/local/src/tor && \
     cd /usr/local/src/tor && \
@@ -15,43 +16,50 @@ RUN     apk add --no-cache git bind-tools cargo libevent-dev openssl-dev gnupg g
     git checkout tor-$TOR_VERSION && \
     ./autogen.sh && \
     ./configure \
+    --enable-fatal-warnings=no \
     --disable-asciidoc \
     --sysconfdir=/etc \
     --disable-unittests && \
-    make -j$(nprocs) && make install && \
+    make -j$(nproc) && make install && \
     cd .. && \
     rm -rf tor && \
     pip3 install --upgrade pip poetry && \
     apk del git libevent-dev openssl-dev gnupg cargo make automake autoconf musl-dev coreutils libffi-dev && \
     apk add --no-cache libevent openssl
 
-RUN    apk add --no-cache git gcc make automake autoconf musl-dev libtool && \
+RUN set -ex; \
+    apk add --no-cache git gcc make automake autoconf musl-dev libtool && \
     git clone https://git.torproject.org/torsocks.git /usr/local/src/torsocks && \
     cd /usr/local/src/torsocks && \
     TORSOCKS_VERSION=${torsocks_version=$(git tag | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)} && \
     git checkout $TORSOCKS_VERSION && \
     ./autogen.sh && \
-    ./configure && \
-    make -j$(nprocs) && make install && \
+    ./configure \
+    --enable-fatal-warnings=no && \
+    make -j$(nproc) && make install && \
     cd .. && \
     rm -rf torsocks && \
     apk del git gcc make automake autoconf musl-dev libtool
 
-RUN     mkdir -p /etc/tor/
+RUN set -ex; \
+    mkdir -p /etc/tor/
 
 COPY    pyproject.toml /usr/local/src/onions/
 
-RUN     cd /usr/local/src/onions && apk add --no-cache openssl-dev libffi-dev gcc libc-dev && \
+RUN set -ex; \
+    cd /usr/local/src/onions && apk add --no-cache openssl-dev libffi-dev gcc libc-dev && \
     poetry install --only main --no-root && \
     apk del libffi-dev gcc libc-dev openssl-dev
 
 COPY    onions /usr/local/src/onions/onions
 COPY    poetry.lock /usr/local/src/onions/
-RUN     cd /usr/local/src/onions && apk add --no-cache gcc libc-dev && \
+RUN set -ex; \
+    cd /usr/local/src/onions && apk add --no-cache gcc libc-dev && \
     poetry install --only main && \
     apk del gcc libc-dev
 
-RUN     mkdir -p ${HOME}/.tor && \
+RUN set -ex; \
+    mkdir -p ${HOME}/.tor && \
     addgroup -S -g 107 tor && \
     adduser -S -G tor -u 104 -H -h ${HOME} tor
 

@@ -258,6 +258,18 @@ class Setup(object):
             )
         )
 
+    def load_file_env(self):
+        # for key, val in os.environ.items():
+        #     if key.endswith('_FILE'):
+        #         with open(val, 'r') as f:
+        #             os.environ[key[:-5]] = f.read()
+        if os.environ.get('TOR_CONTROL_PASSWORD_FILE'):
+            with open(os.environ['TOR_CONTROL_PASSWORD_FILE']) as f:
+                # add to env to be used by torrc template
+                pwd = f.read().strip()
+                os.environ['TOR_CONTROL_PASSWORD'] = pwd
+                print(pwd, end='')
+
     def _get_setup_from_env(self):
         self._set_service_names()
         self._setup_keys_and_ports_from_env()
@@ -479,6 +491,8 @@ def main():
     parser.add_argument('--setup-hosts', dest='setup', action='store_true',
                         help='Setup hosts')
 
+    parser.add_argument('--load-file-env', dest='load_file_env', action='store_true')
+
     parser.add_argument('--run-vanguards', dest='vanguards',
                         action='store_true',
                         help='Run Vanguards in tor container')
@@ -490,6 +504,9 @@ def main():
     logging.getLogger().setLevel(logging.WARNING)
     try:
         onions = Onions()
+        if args.load_file_env:
+            onions.load_file_env()
+            return
         if args.vanguards:
             onions.run_vanguards()
             return

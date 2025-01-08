@@ -5,19 +5,17 @@ description = "Display onion sites hosted"
 authors = ["Christophe Mehay <cmehay@nospam.student.42.fr>"]
 license = "WTFPL"
 repository = "https://github.com/cmehay/docker-tor-hidden-service"
-classifiers=[
-        "Programming Language :: Python",
-        "Development Status :: 1 - Planning",
-        "License :: OSI Approved :: BSD License",
-        "Natural Language :: English",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Topic :: System :: Installation/Setup",
-    ]
-packages = [
-    { include = "onions" },
+classifiers = [
+    "Programming Language :: Python",
+    "Development Status :: 1 - Planning",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: System :: Installation/Setup",
 ]
+packages = [{ include = "onions" }]
 
 [tool.poetry.scripts]
 onions = "onions:main"

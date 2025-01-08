@@ -32,8 +32,11 @@ post_run_commands:
         - onions --run-vanguards
 
 set_environment:
+    - tor:
+        - TOR_CONTROL_PASSWORD: onions --load-file-env
     - vanguards:
         - TOR_CONTROL_PORT: onions --resolve-control-port
+        - TOR_CONTROL_PASSWORD: onions --load-file-env
 reload:
     files:
         - /etc/tor/torrc
